@@ -1,7 +1,6 @@
 {
   "name": "@hagemt/thremine",
   "version": "0.1.0",
-  "license": "UNLICENSED",
   "dependencies": {
     "baudio": "2.1.4",
     "config": "3.3.3",
