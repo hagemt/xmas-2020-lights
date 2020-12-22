@@ -5,24 +5,54 @@ const b = require('baudio')
 const fetch = require('node-fetch')
 const debug = require('debug')
 
+const LOG_NAME = 'hagemt'
 const log = Object.freeze({
-  debug: debug('hagemt'),
+  debug: debug(LOG_NAME),
   error: console.error,
 })
 
+const MAGIC_NUMBER = 262 // record scratch
+const doot = (pitch = MAGIC_NUMBER) => {
+  let n = 0
+  const a = b((t) => {
+    const x = Math.sin(t * pitch + Math.sin(n))
+    n += Math.sin(t)
+    return x
+  })
+  a.play()
+}
+
+/*
+const pitches = Array.from({ length: 100 }, (_, i) => MAGIC_NUMBER + 10 * i)
+for (const pitch of pitches) doot(pitch) // this does something very strange
+*/
+
+const _RTT = 0.05 // in seconds; TODO: use HID instead of API over HTTP
+const send = async (hex, href = 'http://localhost:8934', time = _RTT) => {
+  const url = `${href}/blink1/fadeToRGB?rgb=%23${hex}&time=${time}`
+  const res = await fetch(url)
+  if (!res.ok) {
+    // bad request
+    throw new Error(res.status)
+  }
+  const { lastColor } = await res.json()
+  return lastColor // should match hex
+}
+
+const [OFF] = ['000000']
 const selfTest = () => {
   /*
   const [id1] = Blink1.devices()
   const blink1 = new Blink1(id1)
   */
   //const blink1 = new Blink1()
-  let n = 0
-  const a = b((t) => {
-    const x = Math.sin(t * 262 + Math.sin(n))
-    n += Math.sin(t)
-    return x
-  })
-  a.play()
+  /*
+  return send('ffffff')
+    .then(() => doot())
+    .then(() => send(OFF))
+    .catch(() => process.exit(1)) // eslint-disable-line no-process-exit
+  */
+  doot()
 }
 
 const handWave = async (c = { harmonic: false, noise: 0, quiet: process.env.SOX === '0' }) => {
@@ -77,26 +107,14 @@ const handWave = async (c = { harmonic: false, noise: 0, quiet: process.env.SOX 
     return hex
   }
 
-  const _rtt = 0.05 // in seconds; TODO: use HID instead of API over HTTP
-  const send = async (hex, href = 'http://localhost:8934', time = _rtt) => {
-    const url = `${href}/blink1/fadeToRGB?rgb=%23${hex}&time=${time}`
-    const res = await fetch(url)
-    if (!res.ok) {
-      // bad request
-      throw new Error(res.status)
-    }
-    const { lastColor } = await res.json()
-    return lastColor // should match hex
-  }
-
   const handleEvent = ({ hands }) => {
     for (const hand of hands) {
       const hex = toHexColor(hand)
       send(hex).catch(log.error)
     }
   }
-  await send('000000') // start w/ the lights off
-  Leap.loop(_.throttle(handleEvent, 1000 * _rtt))
+  await send(OFF) // should wait for one cycle?
+  Leap.loop(_.throttle(handleEvent, 1000 * _RTT))
 }
 
 module.exports = {
