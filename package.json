@@ -3,28 +3,25 @@
   "version": "0.1.0",
   "dependencies": {
     "baudio": "2.1.4",
-    "config": "3.3.3",
-    "debug": "4.3.1",
-    "leapjs": "1.1.0",
-    "lodash": "4.17.20",
-    "node-blink1": "0.5.1",
-    "node-fetch": "2.6.1"
+    "debug": "4.3.4",
+    "leapjs": "1.1.1",
+    "lodash.throttle": "4.1.1"
   },
   "devDependencies": {
     "cross-env": "7.0.3",
-    "eslint": "7.14.0",
-    "eslint-config-prettier": "7.1.0",
-    "eslint-plugin-import": "2.22.1",
-    "eslint-plugin-mocha": "8.0.0",
+    "eslint": "8.25.0",
+    "eslint-config-prettier": "8.5.0",
+    "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-mocha": "10.1.0",
     "eslint-plugin-node": "11.1.0",
-    "eslint-plugin-prettier": "3.3.0",
-    "mocha": "8.2.1",
-    "nodemon": "2.0.6",
+    "eslint-plugin-prettier": "4.2.1",
+    "mocha": "10.1.0",
+    "nodemon": "2.0.20",
     "nyc": "15.1.0",
-    "prettier": "2.2.1"
+    "prettier": "2.7.1"
   },
   "engines": {
-    "node": "^12"
+    "node": ">=17.5.0"
   },
   "eslintIgnore": [
     "!.eslintrc.js"
@@ -36,11 +33,11 @@
     "singleQuote": true
   },
   "scripts": {
-    "demo": "cross-env DEBUG=*,-nodemon* nodemon demo.js",
+    "dev": "cross-env DEBUG=*,-nodemon* nodemon demo.js",
     "prereport": "nyc -- mocha",
     "report": "nyc report -r html",
-    "postreport": "eslint -- .",
-    "start": "npm run demo",
+    "postreport": "eslint --fix .",
+    "start": "node demo.js",
     "test": "npm run report"
   }
 }
